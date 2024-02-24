@@ -1,0 +1,152 @@
+server:
+  port: 8091
+  # 1核2G内存，线程数经验值200；4核8G内存【accept-count=1000、max-threads=800、max-connections=10000】，线程数经验值800。线程池过大，cpu调度会消耗大量时间
+  tomcat:
+    mbeanregistry:
+      enabled: true
+    max-connections: 100
+    threads:
+      max: 100        # 设定处理客户请求的线程的最大数目，决定了服务器可以同时响应客户请求的数,默认200
+      min-spare: 50   # 初始化线程数,最小空闲线程数,默认是10
+    accept-count: 10  # 等待队列长度
+
+# 应用配置
+app:
+  config:
+    # 版本，方便通过接口版本升级
+    api-version: v1
+    # 跨域，开发阶段可以设置为 * 不限制
+    cross-origin: '*'
+    # 访问频次限制
+    limit-count: 10
+    # 白名单，不做频次拦截【微信的openai】oxfA9w8-23yvwTmo2ombz0E4zJv4
+    white-list: ojbZUv18lbmriaTjcCWBYkOrSbHA
+
+# 支付配置；如果你申请了支付渠道，则可以配置 enable = true，否则就配置 false 走流程测试
+wxpay:
+  config:
+    # 状态；true = 开启、false 关闭
+    enabled: false
+    # 申请支付主体的 appid
+    appid:
+    # 商户号
+    mchid:
+    # 回调地址
+    notify-url: http://你的地址.natapp1.cc/api/v1/mall/pay_notify
+    # 商户API私钥路径
+    private-key-path: cert/apiclient_key.pem
+    # 商户证书序列号：openssl x509 -in apiclient_cert.pem -noout -serial
+    merchant-serial-number:
+    # 商户APIV3密钥
+    api-v3-key:
+
+# 线程池配置
+thread:
+  pool:
+    executor:
+      config:
+        core-pool-size: 20
+        max-pool-size: 50
+        keep-alive-time: 5000
+        block-queue-size: 5000
+        policy: CallerRunsPolicy
+
+# ChatGPT SDK Config
+chatgpt:
+  sdk:
+    config:
+      # 状态；true = 开启、false 关闭
+      enabled: true
+      # 官网地址 https://api.openai.com/ 1美金:7人民币
+      api-host: https://pro-share-aws-api.zcyai.com/
+      # 官网申请 https://platform.openai.com/account/api-keys
+      api-key: sk-95dgREJQ5uzySe3FC171273fAa8448D7A1B5D1Ee32994aA4
+
+# ChatGLM SDK Config
+chatglm:
+  sdk:
+    config:
+      # 状态；true = 开启、false 关闭
+      enabled: true
+      # 官网地址
+      api-host: https://open.bigmodel.cn/
+      # 官网申请 https://open.bigmodel.cn/usercenter/apikeys - 自己可申请(默认18块的额度很够用)，也推荐测试学习的时候，使用 ChatGLM
+      api-secret-key: 17a8753f8e93531e2f6260f757f2b654.dHasbNx16QKU0HFO
+
+# 微信公众号配置信息
+# originalid：原始ID
+# appid：个人AppID
+# token：开通接口服务自定义设置
+wx:
+  config:
+    originalid: gh_be811c0bd954
+    appid: wx80ab3cf7bb8691aa
+    token: b8b6
+
+# 数据库配置；SpringBoot 默认连接池为 HikariDataSource
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/openai?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  hikari:
+    pool-name: Retail_HikariCP
+    minimum-idle: 15 #最小空闲连接数量
+    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
+    maximum-pool-size: 25 #连接池最大连接数，默认是10
+    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
+    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
+    connection-test-query: SELECT 1
+  type: com.zaxxer.hikari.HikariDataSource
+
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  config-location: classpath:/mybatis/config/mybatis-config.xml
+
+# Redis
+redis:
+  sdk:
+    config:
+      host: 127.0.0.1
+      port: 6379
+      pool-size: 10
+      min-idle-size: 5
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
+
+# 监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # 暴露所有端点，包括自定义端点
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: always # 显示详细的健康检查信息
+  metrics:
+    export:
+      prometheus:
+        enabled: true # 启用Prometheus
+  prometheus:
+    enabled: true # 启用Prometheus端点
+  jmx:
+    enabled: true # 启用JMX监控
+  system:
+    cpu:
+      enabled: true # 启用CPU监控
+    memory:
+      enabled: true # 启用内存监控
+
+# 日志
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
